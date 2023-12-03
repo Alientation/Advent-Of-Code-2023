@@ -2,6 +2,10 @@ import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
+/**
+ * Base template for each day's solution
+ * Simply toggle the constants to run the correct part and files
+ */
 public class Day {
     private static final String TEST_FILES_DIRECTORY = "files\\tests";
     private static final String INPUT_FILES_DIRECTORY = "files\\inputs";
