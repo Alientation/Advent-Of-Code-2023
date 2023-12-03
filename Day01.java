@@ -54,7 +54,7 @@ public class Day01 {
                 boolean found = false;
                 for (int j = 0; j < map.length; j++) {
                     if (line.startsWith(map[j], i)) {
-                        sb.append('0' + (j + 1));
+                        sb.append("" + (j + 1));
                         found = true;
                         break;
                     }
