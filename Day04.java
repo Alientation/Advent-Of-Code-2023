@@ -10,73 +10,84 @@ public class Day04 {
 
     private static final String DAY = "04";
     private static final boolean RUN_TEST_INPUT = false;
-    private static final boolean RUN_PART_1 = false;
+    private static final boolean RUN_PART_1 = true;
 
     private static void part1(Scanner console) {
-        int sum = 0;
+        int sumPts = 0;
+
+        // read in each card
         while (console.hasNextLine()) {
-            console.next();
-            console.next();
-            HashSet<Integer> win = new HashSet<>();
+            console.next(); // 'Card'
+            console.next(); // '#:'
+
+            // read in the winning numbers
+            HashSet<Integer> winningNumbers = new HashSet<>();
             while (console.hasNextInt()) {
-                win.add(console.nextInt());
+                winningNumbers.add(console.nextInt());
             }
-            console.next();
+            console.next(); // '|'
             
-            int c = 1;
+            // read in card numbers
+            int countMatches = 0; // how many winning numbers are on the card
             while (console.hasNextInt()) {
                 int n = console.nextInt();
-                if (win.contains(n)) {
-                    c *= 2;
+                if (winningNumbers.contains(n)) {
+                    countMatches++;
                 }
             }
 
-            sum += c / 2;
+            // calculate points earned
+            sumPts += (1 << countMatches) >> 1;
         }
 
-        System.out.println(sum);
+        System.out.println(sumPts);
     }
 
     private static void part2(Scanner console) {
-        ArrayList<Integer> s = new ArrayList<>();
-        int cur = 0;
+        ArrayList<Integer> cardCounts = new ArrayList<>();
+        int curCard = 0;
+
+        // for each card
         while (console.hasNextLine()) {
-            if (s.size() < cur + 1) {
-                s.add(1);
+            if (curCard == cardCounts.size()) {
+                cardCounts.add(1); // default one card
             }
 
-            console.next();
-            console.next();
-            HashSet<Integer> win = new HashSet<>();
+            console.next(); // 'Card'
+            console.next(); // '#:'
+
+            // read in winning card numbers
+            HashSet<Integer> winningNumbers = new HashSet<>();
             while (console.hasNextInt()) {
-                win.add(console.nextInt());
+                winningNumbers.add(console.nextInt());
             }
-            console.next();
+            console.next(); // '|'
 
-            int count = 0;
+            int countMatches = 0;
              while (console.hasNextInt()) {
                 int n = console.nextInt();
-                if (win.contains(n)) {
-                    count++;
+                if (winningNumbers.contains(n)) {
+                    countMatches++;
                 }
             }
 
-            for (int i = cur + 1; i < cur + 1 + count; i++) {
-                if (i >= s.size()) {
-                    s.add(s.get(cur) + 1);
+            // add duplicate cards
+            for (int nextCard = curCard + 1; nextCard < curCard + 1 + countMatches; nextCard++) {
+                if (nextCard >= cardCounts.size()) {
+                    cardCounts.add(cardCounts.get(curCard) + 1); // haven't populated yet
                 } else {
-                    s.set(i, s.get(i) + s.get(cur));
+                    cardCounts.set(nextCard, cardCounts.get(nextCard) + cardCounts.get(curCard));
                 }
             }
 
-            cur++;
+            curCard++;
         }
         
-        int sum = 0;
-        for (int i : s) {
-            sum += i;
+        int sumCards = 0;
+        for (int cardCount : cardCounts) {
+            sumCards += cardCount;
         }
-        System.out.println(sum);
+        System.out.println(sumCards);
     }
 
 
