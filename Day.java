@@ -15,15 +15,15 @@ public class Day {
     private static final boolean RUN_PART_1 = true;
 
     private static void part1(Scanner console) {
-        
+
     }
 
     private static void part2(Scanner console) {
-        
+
     }
 
-
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
             file = TEST_FILES_DIRECTORY + "\\day" + DAY;
@@ -36,15 +36,17 @@ public class Day {
         } else {
             file += "-p2.txt";
         }
-        
 
         Scanner console = new Scanner(new FileReader(file));
-        
+
         if (RUN_PART_1) {
             part1(console);
         } else {
             part2(console);
         }
         console.close();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Program took " + (endTime - startTime) + " ms to complete");
     }
 }
