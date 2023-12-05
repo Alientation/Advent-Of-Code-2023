@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -16,10 +17,10 @@ public class Day03 {
         while (console.hasNextLine()) {
             lines.add(console.nextLine());
         }
-        
+
         // possible directions numbers could be relative to a symbol
         int[][] directions = new int[][] {
-            {0,1}, {1,0}, {0,-1}, {-1,0}, {-1,-1}, {1,1}, {-1,1}, {1,-1}
+                { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 }
         };
 
         int sum = 0;
@@ -73,7 +74,7 @@ public class Day03 {
         }
 
         int[][] directions = new int[][] {
-            {0,1}, {1,0}, {0,-1}, {-1,0}, {-1,-1}, {1,1}, {-1,1}, {1,-1}
+                { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 }
         };
 
         int sum = 0;
@@ -115,6 +116,7 @@ public class Day03 {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
             file = TEST_FILES_DIRECTORY + "\\day" + DAY;
@@ -127,15 +129,17 @@ public class Day03 {
         } else {
             file += "-p2.txt";
         }
-        
 
-        Scanner console = new Scanner(new FileReader(file));
-        
+        Scanner console = new Scanner(new BufferedReader(new FileReader(file)));
+
         if (RUN_PART_1) {
             part1(console);
         } else {
             part2(console);
         }
         console.close();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Program took " + (endTime - startTime) + " ms to complete");
     }
 }

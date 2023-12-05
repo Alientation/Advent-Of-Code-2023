@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -14,7 +15,7 @@ public class Day01 {
         int sum = 0;
 
         // each line
-        while (console.hasNextLine()){
+        while (console.hasNextLine()) {
             String line = console.nextLine();
 
             // find first digit
@@ -41,11 +42,11 @@ public class Day01 {
         int sum = 0;
 
         String[] map = new String[] {
-            "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
+                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
         };
 
         // each line
-        while (console.hasNextLine()){
+        while (console.hasNextLine()) {
             String line = console.nextLine();
 
             // replace first occurences of spelled out numbers with respective digit
@@ -85,11 +86,11 @@ public class Day01 {
         System.out.println(sum);
     }
 
-
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
-            file = TEST_FILES_DIRECTORY + "\\day"+ DAY;
+            file = TEST_FILES_DIRECTORY + "\\day" + DAY;
         } else {
             file = INPUT_FILES_DIRECTORY + "\\day" + DAY;
         }
@@ -100,13 +101,15 @@ public class Day01 {
             file += "-p2.txt";
         }
 
-
-        Scanner console = new Scanner(new FileReader(file));
+        Scanner console = new Scanner(new BufferedReader(new FileReader(file)));
         if (RUN_PART_1) {
             part1(console);
         } else {
             part2(console);
         }
         console.close();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Program took " + (endTime - startTime) + " ms to complete");
     }
 }

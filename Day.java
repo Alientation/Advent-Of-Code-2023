@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -37,7 +38,7 @@ public class Day {
             file += "-p2.txt";
         }
 
-        Scanner console = new Scanner(new FileReader(file));
+        Scanner console = new Scanner(new BufferedReader(new FileReader(file)));
 
         if (RUN_PART_1) {
             part1(console);

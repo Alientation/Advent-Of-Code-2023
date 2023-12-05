@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.HashSet;
@@ -26,7 +27,7 @@ public class Day04 {
                 winningNumbers.add(console.nextInt());
             }
             console.next(); // '|'
-            
+
             // read in card numbers
             int countMatches = 0; // how many winning numbers are on the card
             while (console.hasNextInt()) {
@@ -64,7 +65,7 @@ public class Day04 {
             console.next(); // '|'
 
             int countMatches = 0;
-             while (console.hasNextInt()) {
+            while (console.hasNextInt()) {
                 int n = console.nextInt();
                 if (winningNumbers.contains(n)) {
                     countMatches++;
@@ -82,7 +83,7 @@ public class Day04 {
 
             curCard++;
         }
-        
+
         int sumCards = 0;
         for (int cardCount : cardCounts) {
             sumCards += cardCount;
@@ -90,8 +91,8 @@ public class Day04 {
         System.out.println(sumCards);
     }
 
-
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
             file = TEST_FILES_DIRECTORY + "\\day" + DAY;
@@ -104,15 +105,17 @@ public class Day04 {
         } else {
             file += "-p2.txt";
         }
-        
 
-        Scanner console = new Scanner(new FileReader(file));
-        
+        Scanner console = new Scanner(new BufferedReader(new FileReader(file)));
+
         if (RUN_PART_1) {
             part1(console);
         } else {
             part2(console);
         }
         console.close();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Program took " + (endTime - startTime) + " ms to complete");
     }
 }

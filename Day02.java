@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -75,7 +76,7 @@ public class Day02 {
             // extract game info
             String[] game = line.split(": ");
             String[] rounds = game[1].split("; ");
-            
+
             int b = 0;
             int r = 0;
             int g = 0;
@@ -105,6 +106,7 @@ public class Day02 {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
             file = TEST_FILES_DIRECTORY + "\\day" + DAY;
@@ -117,15 +119,17 @@ public class Day02 {
         } else {
             file += "-p2.txt";
         }
-        
 
-        Scanner console = new Scanner(new FileReader(file));
-        
+        Scanner console = new Scanner(new BufferedReader(new FileReader(file)));
+
         if (RUN_PART_1) {
             part1(console);
         } else {
             part2(console);
         }
         console.close();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Program took " + (endTime - startTime) + " ms to complete");
     }
 }
