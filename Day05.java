@@ -1,63 +1,79 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 /**
- * Base template for each day's solution
- * Simply toggle the constants to run the correct part and files
+ * Notes...
+ * 
+ * Sorting the mapping ranges and inputs and filtering out low map ranges only
+ * results in a 2 ms performance improvement. I suspect that most of the time
+ * lost is a result of using Scanner to read inputs instead of BufferedReader.
+ * However, since Scanner is cleaner and easier to use, I will continue to use
+ * Scanner.
  */
 public class Day05 {
     private static final String TEST_FILES_DIRECTORY = "files\\tests";
     private static final String INPUT_FILES_DIRECTORY = "files\\inputs";
 
     private static final String DAY = "05";
-    private static final boolean RUN_TEST_INPUT = true;
+    private static final boolean RUN_TEST_INPUT = false;
     private static final boolean RUN_PART_1 = false;
 
     private static void part1(Scanner console) {
-        console.next();
-        ArrayList<Long> seeds = new ArrayList<>();
+        console.next(); // 'seeds:'
+
+        // read in starting numbers
+        ArrayList<Long> inputs = new ArrayList<>();
         while (console.hasNextLong()) {
-            seeds.add(console.nextLong());
+            inputs.add(console.nextLong());
         }
 
+        // 7 mapping functions, parse each one
         for (int k = 0; k < 7; k++) {
-            console.nextLine();
+            console.nextLine(); // skip newlines
             console.nextLine();
             console.nextLine();
 
-            ArrayList<long[]> map = new ArrayList<>();
+            // create map of mapping function
+            ArrayList<long[]> maps = new ArrayList<>();
             while (console.hasNextLong()) {
-                long low = console.nextLong();
-                long high = console.nextLong();
-                long val = console.nextLong();
-                map.add(new long[] { low, high, val });
+                long newStart = console.nextLong(); // where the start of the section moves to
+                long start = console.nextLong(); // section's start
+                long length = console.nextLong(); // length of section
+                maps.add(new long[] { newStart, start, length });
             }
 
-            ArrayList<Long> newRes = new ArrayList<>();
+            // the results of the current mapping function
+            ArrayList<Long> outputs = new ArrayList<>();
 
-            for (long prev : seeds) {
-                boolean found = false;
-                for (long[] m : map) {
-                    if (prev >= m[1] && prev <= m[1] + m[2]) {
-                        newRes.add(m[0] + prev - m[1]);
+            // calculate output of the previous input numbers
+            for (long input : inputs) {
+                boolean found = false; // if found a map
+
+                // for each mapping range
+                for (long[] map : maps) {
+                    if (input >= map[1] && input <= map[1] + map[2]) {
+                        outputs.add(map[0] + input - map[1]);
                         found = true;
                         break;
                     }
                 }
 
+                // not found, therefore the input becomes the output
                 if (!found) {
-                    newRes.add(prev);
+                    outputs.add(input);
                 }
             }
 
-            seeds = newRes;
+            // feed this output into the next mapping inputs
+            inputs = outputs;
         }
 
+        // find lowest value of all the previous outputs
         long lowest = Long.MAX_VALUE;
-        for (long loc : seeds) {
+        for (long loc : inputs) {
             lowest = Math.min(lowest, loc);
         }
 
@@ -65,80 +81,98 @@ public class Day05 {
     }
 
     private static void part2(Scanner console) {
-        console.next();
-        ArrayList<long[]> seeds = new ArrayList<>();
+        console.next(); // 'seeds:'
+
+        // read in starting ranges
+        ArrayList<long[]> inputs = new ArrayList<>();
         while (console.hasNextLong()) {
             long start = console.nextLong();
             long length = console.nextLong();
-            seeds.add(new long[] { start, length });
+            inputs.add(new long[] { start, length });
         }
 
+        // for each mapping function
         for (int k = 0; k < 7; k++) {
-            console.nextLine();
+            console.nextLine(); // skip newlines
             console.nextLine();
             console.nextLine();
 
-            ArrayList<long[]> map = new ArrayList<>();
+            // create map of mapping function
+            ArrayList<long[]> maps = new ArrayList<>();
             while (console.hasNextLong()) {
-                long low = console.nextLong();
-                long high = console.nextLong();
-                long val = console.nextLong();
-                map.add(new long[] { low, high, val });
+                long newStart = console.nextLong();
+                long start = console.nextLong();
+                long length = console.nextLong();
+                maps.add(new long[] { newStart, start, length });
             }
 
-            ArrayList<long[]> newRes = new ArrayList<>();
+            // the resulting ranges of the mapping function
+            ArrayList<long[]> outputs = new ArrayList<>();
 
-            for (int i = 0; i < seeds.size(); i++) {
-                long[] prev = seeds.get(i);
+            // for each input range
+            for (int i = 0; i < inputs.size(); i++) { // can't use for each loop since concurrent modification
+                long[] input = inputs.get(i);
+
+                // whether this range was partially/fully mapped to a new range
                 boolean found = false;
 
-                long start = prev[0];
-                long end = start + prev[1] - 1;
-                for (long[] m : map) {
-                    long mStart = m[1];
-                    long mEnd = mStart + m[2] - 1;
+                // start and end of input range
+                long start = input[0];
+                long end = start + input[1] - 1;
 
-                    // intersection
-                    if (start <= mEnd && end >= mStart) {
-                        long newStart = Math.max(mStart, start) - mStart + m[0];
-                        long newLength = Math.min(mEnd, end) - Math.max(mStart, start) + 1;
-                        newRes.add(new long[] { newStart, newLength });
+                // for each mapping range
+                for (long[] map : maps) {
+                    // start and end of mapping range
+                    long mapStart = map[1];
+                    long mapEnd = mapStart + map[2] - 1;
+
+                    // check if the input range intersects with the mapping range
+                    // ie, if the input range begins to the left of the mapping range's end, and
+                    // ends after the mapping range's start, since input range end > input range
+                    // end,
+                    // therefore the input range must be intersecting the mapping range.
+                    if (start <= mapEnd && end >= mapStart) {
+                        // start and length of the output range
+                        // get distance from the input range's start to the mapping range's start
+                        // (0 if to the left of mapping range), and add the ew mappingg start.
+                        long newStart = Math.max(mapStart, start) - mapStart + map[0];
+                        long newLength = Math.min(mapEnd, end) - Math.max(mapStart, start) + 1;
+                        outputs.add(new long[] { newStart, newLength });
                         found = true;
 
-                        // add the remainder of this section
-                        if (mEnd < end) {
-                            seeds.add(new long[] { mEnd + 1, end - mEnd });
+                        // add the remaining parts of the input range on the right side
+                        if (mapEnd < end) {
+                            inputs.add(new long[] { mapEnd + 1, end - mapEnd });
                         }
 
-                        if (mStart > start) {
-                            seeds.add(new long[] { start, mStart - start });
+                        // add the remaining parts of the input range on the left side
+                        if (mapStart > start) {
+                            inputs.add(new long[] { start, mapStart - start });
                         }
                         break;
                     }
                 }
 
+                // not found, therefore this input range becomes an output range
                 if (!found) {
-                    newRes.add(prev);
+                    outputs.add(input);
                 }
             }
 
-            for (long[] l : newRes) {
-                System.out.print(Arrays.toString(l) + " ");
-            }
-            System.out.println();
-
-            seeds = newRes;
+            inputs = outputs;
         }
 
+        // find lowest value of all the previous outputs
         long lowest = Long.MAX_VALUE;
-        for (long[] loc : seeds) {
-            lowest = Math.min(lowest, loc[0]);
+        for (long[] loc : inputs) {
+            lowest = Math.min(lowest, loc[0]); // lowest value will always be the start of a range
         }
 
         System.out.println(lowest);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
             file = TEST_FILES_DIRECTORY + "\\day" + DAY;
@@ -152,7 +186,7 @@ public class Day05 {
             file += "-p2.txt";
         }
 
-        Scanner console = new Scanner(new FileReader(file));
+        Scanner console = new Scanner(new BufferedReader(new FileReader(file)));
 
         if (RUN_PART_1) {
             part1(console);
@@ -160,5 +194,8 @@ public class Day05 {
             part2(console);
         }
         console.close();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Program took " + (endTime - startTime) + " ms to complete");
     }
 }
