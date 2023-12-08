@@ -46,28 +46,25 @@ public class Day07 {
                 max = Math.max(max, counts.get(c));
             }
 
-            if (max == 5) {
+            if (max == 5) { // five of a kind
                 type = 7;
-            } else if (max == 4) {
+            } else if (max == 4) { // four of a kind
                 type = 6;
-            } else if (max == 3 && counts.size() == 2) {
+            } else if (max == 3 && counts.size() == 2) { // full house
                 type = 5;
-            } else if (max == 3 && counts.size() == 3) {
+            } else if (max == 3 && counts.size() == 3) { // three of a kind
                 type = 3;
-            } else if (max == 2 && counts.size() == 3) {
+            } else if (max == 2 && counts.size() == 3) { // two pair
                 type = 2;
-            } else if (max == 2 && counts.size() == 4) {
+            } else if (max == 2 && counts.size() == 4) { // one pair
                 type = 1;
-            } else {
+            } else { // high card
                 type = 0;
             }
             int bid = console.nextInt();
 
             hands.add(new Hand(bid, hand, type));
             console.nextLine();
-        }
-        for (Hand hand : hands) {
-            System.out.println(hand.bid + " " + hand.type + " " + Arrays.toString(hand.cards));
         }
 
         String val = "AKQJT98765432";
@@ -135,11 +132,6 @@ public class Day07 {
             hands.add(new Hand(bid, hand, type));
             console.nextLine();
         }
-
-        // for (Hand hand : hands) {
-        // System.out.println(hand.bid + " " + hand.type + " " +
-        // Arrays.toString(hand.cards));
-        // }
 
         String val = "AKQT98765432J";
 
