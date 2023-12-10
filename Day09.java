@@ -14,7 +14,7 @@ public class Day09 {
 
     private static final String DAY = "09";
     private static final boolean RUN_TEST_INPUT = false;
-    private static final boolean RUN_PART_1 = false;
+    private static final boolean RUN_PART_1 = true;
 
     private static void part1(Scanner console) {
         int sum = 0;
