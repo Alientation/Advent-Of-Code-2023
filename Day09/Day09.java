@@ -1,5 +1,6 @@
 package Day09;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,47 +16,48 @@ public class Day09 {
 
     private static final String DAY = "09";
     private static final boolean RUN_TEST_INPUT = false;
-    private static final boolean RUN_PART_1 = true;
+    private static final boolean RUN_PART_1 = false;
 
     private static void part1(Scanner console) {
         int sum = 0;
         while (console.hasNextLine()) {
             String line = console.nextLine();
             String[] numbers = line.split(" ");
-            int[][] n = new int[numbers.length][numbers.length];
+            ArrayList<int[]> sequence_lines = new ArrayList<>();
+            int[] sequence = new int[numbers.length]; // initial sequence of numbers
             for (int i = 0; i < numbers.length; i++) {
-                n[0][i] = Integer.parseInt(numbers[i]);
+                sequence[i] = Integer.parseInt(numbers[i]);
             }
+            sequence_lines.add(sequence);
 
-            int li = 1;
-            for (int i = 1; i < n.length; i++) {
+            // until the sequence becomes all zero, continue to add new sequences
+            while (true) {
                 boolean isZero = true;
-                for (int j = 0; j < n.length - i; j++) {
-                    n[i][j] = n[i - 1][j + 1] - n[i - 1][j];
-                    if (n[i][j] != 0) {
+                // each new sequence is one smaller than the previous
+                sequence = new int[sequence_lines.get(sequence_lines.size() - 1).length - 1];
+                for (int j = 0; j < sequence.length; j++) {
+                    // difference between the two numbers above the current index
+                    sequence[j] = sequence_lines.get(sequence_lines.size() - 1)[j + 1]
+                            - sequence_lines.get(sequence_lines.size() - 1)[j];
+                    if (sequence[j] != 0) {
                         isZero = false;
                     }
                 }
 
                 if (isZero) {
-                    li = i;
                     break;
                 }
+
+                sequence_lines.add(sequence); // add new nonzero sequence
             }
 
-            for (int i = 0; i <= li; i++) {
-                for (int j = 0; j < n.length - i; j++) {
-                    System.out.print(n[i][j] + " ");
-                }
-                System.out.println();
-            }
-
+            // add the right most values in all the sequences to get the next value in the
+            // original sequence
             int val = 0;
-            for (int i = 0; i < li; i++) {
-                val += n[i][n.length - i - 1];
+            for (int i = 0; i < sequence_lines.size(); i++) {
+                val += sequence_lines.get(i)[sequence_lines.get(i).length - 1];
             }
 
-            System.out.println(val + "\n");
             sum += val;
         }
 
@@ -67,40 +69,43 @@ public class Day09 {
         while (console.hasNextLine()) {
             String line = console.nextLine();
             String[] numbers = line.split(" ");
-            int[][] n = new int[numbers.length][numbers.length];
+            ArrayList<int[]> sequence_lines = new ArrayList<>();
+            int[] sequence = new int[numbers.length]; // initial sequence of numbers
             for (int i = 0; i < numbers.length; i++) {
-                n[0][i] = Integer.parseInt(numbers[i]);
+                sequence[i] = Integer.parseInt(numbers[i]);
             }
+            sequence_lines.add(sequence);
 
-            int li = 1;
-            for (int i = 1; i < n.length; i++) {
+            // until the sequence becomes all zero, continue to add new sequences
+            while (true) {
                 boolean isZero = true;
-                for (int j = 0; j < n.length - i; j++) {
-                    n[i][j] = n[i - 1][j + 1] - n[i - 1][j];
-                    if (n[i][j] != 0) {
+                // each new sequence is one smaller than the previous
+                sequence = new int[sequence_lines.get(sequence_lines.size() - 1).length - 1];
+                for (int j = 0; j < sequence.length; j++) {
+                    // difference between the two numbers above the current index
+                    sequence[j] = sequence_lines.get(sequence_lines.size() - 1)[j + 1]
+                            - sequence_lines.get(sequence_lines.size() - 1)[j];
+                    if (sequence[j] != 0) {
                         isZero = false;
                     }
                 }
 
                 if (isZero) {
-                    li = i;
                     break;
                 }
+
+                sequence_lines.add(sequence); // add new nonzero sequence
             }
 
-            for (int i = 0; i <= li; i++) {
-                for (int j = 0; j < n.length - i; j++) {
-                    System.out.print(n[i][j] + " ");
-                }
-                System.out.println();
-            }
-
+            // from the bottom sequence to the top original sequence,
+            // take the left most number (starting number of the sequence) and subtract
+            // with the previous value to store as the new val.
+            // essentially, this is undoing the addition of the first number to get the
+            // previous number in each sequence
             int val = 0;
-            for (int i = li - 1; i >= 0; i--) {
-                val = n[i][0] - val;
+            for (int i = sequence_lines.size() - 1; i >= 0; i--) {
+                val = sequence_lines.get(i)[0] - val;
             }
-
-            System.out.println(val + "\n");
             sum += val;
         }
 
