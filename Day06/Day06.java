@@ -19,64 +19,71 @@ public class Day06 {
     private static final boolean RUN_PART_1 = false;
 
     private static void part1(Scanner console) {
-        console.next();
+        console.next(); // 'Time:'
         ArrayList<Integer> times = new ArrayList<Integer>();
         while (console.hasNextInt()) {
             times.add(console.nextInt());
         }
 
-        console.nextLine();
-        console.next();
+        console.nextLine(); // '\n'
+        console.next(); // 'Distance:'
 
         ArrayList<Integer> distances = new ArrayList<Integer>();
         while (console.hasNextInt()) {
             distances.add(console.nextInt());
         }
 
+        // for each race, multiply the number of possible ways to win
         int sum = 1;
         for (int race = 0; race < times.size(); race++) {
-            int count = 0;
-            for (int timeHeld = 1; timeHeld < times.get(race); timeHeld++) {
+            int numPossibleWins = 0; // count how many possible ways to win for this race
+            // for each time held, check if it is possible to win
+            for (int timeHeld = 1; timeHeld < times.get(race); timeHeld++) { // timeHeld is the velocity
+                // check if time remaining * velocity is strictly greater than the distance
+                // required to win
                 if ((times.get(race) - timeHeld) * timeHeld > distances.get(race)) {
-                    count++;
+                    numPossibleWins++;
                 }
             }
-            System.out.println(count);
-            sum *= count;
+            System.out.println(numPossibleWins);
+            sum *= numPossibleWins;
         }
 
         System.out.println(sum);
     }
 
     private static void part2(Scanner console) {
-        console.next();
+        console.next(); // 'Time:'
         long time = 0;
-        while (console.hasNextInt()) {
-            int in = console.nextInt();
-            int in2 = in;
-            while (in > 0) {
+        while (console.hasNextInt()) { // read in the numbers as one whole number
+            int partialTime = console.nextInt();
+            int temp = partialTime;
+            // shift the previous digits over enough to append this partial time
+            while (temp > 0) {
                 time *= 10;
-                in /= 10;
+                temp /= 10;
             }
-            time += in2;
+            time += partialTime;
         }
 
-        console.nextLine();
-        console.next();
+        console.nextLine(); // '\n'
+        console.next(); // 'Distance:'
 
         long distance = 0;
-        while (console.hasNextInt()) {
-            int in = console.nextInt();
-            int in2 = in;
-            while (in > 0) {
+        while (console.hasNextInt()) { // read in the numbers as one whole number
+            int partialDistance = console.nextInt();
+            int temp = partialDistance;
+            // shift the previous digits over enough to append this partial time
+            while (temp > 0) {
                 distance *= 10;
-                in /= 10;
+                temp /= 10;
             }
-            distance += in2;
+            distance += partialDistance;
         }
 
         System.out.println(time + " " + distance);
 
+        // Quadratic formula to find the intercepts with the line y = distance
         double a = -1;
         double b = time;
         double c = -distance;
