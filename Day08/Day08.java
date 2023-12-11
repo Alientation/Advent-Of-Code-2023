@@ -36,95 +36,109 @@ public class Day08 {
         String direction = console.nextLine();
         console.nextLine();
         HashMap<String, Node> nodes = new HashMap<String, Node>();
-        while (console.hasNextLine()) {
+        // construct graph
+        while (console.hasNextLine()) { // ugly ugly and ugly
             String line = console.nextLine();
-            String[] split = line.split(" = ");
-            String node = split[0];
-            String[] split2 = split[1].substring(1, split[1].length() - 1).split(", ");
-            String left = split2[0];
-            String right = split2[1];
-            nodes.put(node, new Node(node, left, right));
+            String[] nodeInfo = line.split(" = ");
+            String name = nodeInfo[0];
+            String[] children = nodeInfo[1].substring(1, nodeInfo[1].length() - 1).split(", ");
+            String leftChild = children[0];
+            String rightChild = children[1];
+            nodes.put(name, new Node(name, leftChild, rightChild));
         }
 
-        int index = 0;
-        int count = 0;
+        // traverse graph
+        int dirIndex = 0;
+        int steps = 0;
         Node cur = nodes.get("AAA");
+
+        // while we haven't reached the end
         while (cur != nodes.get("ZZZ")) {
-            if (index >= direction.length()) {
-                index = 0;
+            if (dirIndex >= direction.length()) {
+                dirIndex = 0; // loop back around
             }
 
-            if (direction.charAt(index) == 'L') {
+            if (direction.charAt(dirIndex) == 'L') {
                 cur = nodes.get(cur.left);
             } else {
                 cur = nodes.get(cur.right);
             }
 
-            index++;
-            count++;
+            dirIndex++;
+            steps++;
         }
 
-        System.out.println(count);
+        System.out.println(steps);
     }
 
     private static void part2(Scanner console) {
         String direction = console.nextLine();
         console.nextLine();
         HashMap<String, Node> nodes = new HashMap<String, Node>();
-        while (console.hasNextLine()) {
+        // construct graph
+        while (console.hasNextLine()) { // ugly ugly and ugly
             String line = console.nextLine();
-            String[] split = line.split(" = ");
-            String node = split[0];
-            String[] split2 = split[1].substring(1, split[1].length() - 1).split(", ");
-            String left = split2[0];
-            String right = split2[1];
-            nodes.put(node, new Node(node, left, right));
+            String[] nodeInfo = line.split(" = ");
+            String name = nodeInfo[0];
+            String[] children = nodeInfo[1].substring(1, nodeInfo[1].length() - 1).split(", ");
+            String leftChild = children[0];
+            String rightChild = children[1];
+            nodes.put(name, new Node(name, leftChild, rightChild));
         }
 
-        ArrayList<Node> cur = new ArrayList<>();
-        for (String node : nodes.keySet()) {
-            if (node.endsWith("A")) {
-                cur.add(nodes.get(node));
+        // add all starting nodes
+        ArrayList<Node> startNodes = new ArrayList<>();
+        for (String nodeName : nodes.keySet()) {
+            if (nodeName.endsWith("A")) {
+                startNodes.add(nodes.get(nodeName));
             }
         }
 
-        ArrayList<ArrayList<Integer>> timeWhenVisitedEnd = new ArrayList<>();
-        for (Node c : cur) {
+        ArrayList<ArrayList<Integer>> timesWhenVisitedEnd = new ArrayList<>();
+        for (Node c : startNodes) {
             ArrayList<Integer> times = new ArrayList<>();
-            timeWhenVisitedEnd.add(times);
-            int index = 0;
+            timesWhenVisitedEnd.add(times);
+            int dirIndex = 0;
             int time = 0;
             HashSet<String> visitedSuccessfully = new HashSet<>();
             while (true) {
-                if (index == direction.length()) {
-                    index = 0;
+                if (dirIndex == direction.length()) {
+                    dirIndex = 0; // loop back around
                 }
 
+                // reached end node
                 if (c.cur.endsWith("Z")) {
-                    if (visitedSuccessfully.contains(c.cur + " " + index)) {
+
+                    if (visitedSuccessfully.contains(c.cur + " " + dirIndex)) {
+                        // already visited before at the current index in the directions
+                        // therefore from now on it will simply loop around
                         break;
                     } else {
-                        visitedSuccessfully.add(c.cur + " " + index);
+                        // first time visiting this node at this index in the directions
+                        visitedSuccessfully.add(c.cur + " " + dirIndex);
                         times.add(time);
                     }
                 }
 
-                if (direction.charAt(index) == 'L') {
+                if (direction.charAt(dirIndex) == 'L') {
                     c = nodes.get(c.left);
                 } else {
                     c = nodes.get(c.right);
                 }
 
-                index++;
+                dirIndex++;
                 time++;
             }
         }
 
-        System.out.println(timeWhenVisitedEnd);
+        System.out.println(timesWhenVisitedEnd);
 
-        long lcm = timeWhenVisitedEnd.get(0).get(0);
-        for (int i = 1; i < timeWhenVisitedEnd.size(); i++) {
-            lcm = lcm(timeWhenVisitedEnd.get(i).get(0), lcm);
+        // this is sketchy and only works for inputs like the test input...
+        // the test input lets us just take the lcm of the first time we visit the end,
+        // since there is only ever one time we visit the end in a full cycle.
+        long lcm = timesWhenVisitedEnd.get(0).get(0);
+        for (int i = 1; i < timesWhenVisitedEnd.size(); i++) {
+            lcm = lcm(timesWhenVisitedEnd.get(i).get(0), lcm);
         }
 
         System.out.println(lcm);
