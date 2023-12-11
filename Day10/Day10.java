@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.LinkedList;
 
@@ -20,17 +21,52 @@ public class Day10 {
     private static final boolean RUN_TEST_INPUT = false;
     private static final boolean RUN_PART_1 = false;
 
+    private static class Node {
+        private static enum Direction {
+            UP, DOWN, LEFT, RIGHT
+        }
+
+        int i;
+        int j;
+        int distance;
+        Direction prevDir;
+
+        public Node(int i, int j, int distance, Direction prevDir) {
+            this.i = i;
+            this.j = j;
+            this.distance = distance;
+            this.prevDir = prevDir;
+        }
+
+        public static Direction invert(Direction dir) {
+            switch (dir) {
+                case UP:
+                    return Direction.DOWN;
+                case DOWN:
+                    return Direction.UP;
+                case LEFT:
+                    return Direction.RIGHT;
+                case RIGHT:
+                    return Direction.LEFT;
+                default:
+                    return null;
+            }
+        }
+    }
+
     private static void part1(Scanner console) {
         ArrayList<String> lines = new ArrayList<String>();
         while (console.hasNextLine()) {
             lines.add(console.nextLine());
         }
 
+        // create a map of the pipes
         char[][] map = new char[lines.size()][lines.get(0).length()];
         for (int i = 0; i < lines.size(); i++) {
             map[i] = lines.get(i).toCharArray();
         }
 
+        // find the starting point
         int startI = -1;
         int startJ = -1;
         for (int i = 0; i < map.length; i++) {
@@ -38,12 +74,15 @@ public class Day10 {
                 if (map[i][j] == 'S') {
                     startI = i;
                     startJ = j;
+                    break;
                 }
             }
         }
 
-        Queue<int[]> bfs = new LinkedList<>();
-        bfs.offer(new int[] { startI, startJ, 0, 0, 0 });
+        // do a breadth first search to find the closest point from the start to each
+        // point on the pipe loop
+        Queue<Node> bfs = new LinkedList<>();
+        bfs.offer(new Node(startI, startJ, 0, Node.Direction.DOWN));
         int[][] minDistance = new int[map.length][map[0].length];
         for (int i = 0; i < minDistance.length; i++) {
             for (int j = 0; j < minDistance[i].length; j++) {
@@ -51,82 +90,71 @@ public class Day10 {
             }
         }
 
+        // possible next directions for each pipe type
+        HashMap<Character, Node.Direction[]> pipes = new HashMap<>();
+        pipes.put('S', new Node.Direction[] { Node.Direction.UP, Node.Direction.DOWN, Node.Direction.LEFT,
+                Node.Direction.RIGHT });
+        pipes.put('|', new Node.Direction[] { Node.Direction.UP, Node.Direction.DOWN });
+        pipes.put('-', new Node.Direction[] { Node.Direction.LEFT, Node.Direction.RIGHT });
+        pipes.put('L', new Node.Direction[] { Node.Direction.UP, Node.Direction.RIGHT });
+        pipes.put('J', new Node.Direction[] { Node.Direction.UP, Node.Direction.LEFT });
+        pipes.put('7', new Node.Direction[] { Node.Direction.DOWN, Node.Direction.LEFT });
+        pipes.put('F', new Node.Direction[] { Node.Direction.DOWN, Node.Direction.RIGHT });
+
         while (!bfs.isEmpty()) {
-            int[] curr = bfs.poll();
-            int i = curr[0];
-            int j = curr[1];
-            int distance = curr[2];
+            Node curNode = bfs.poll();
+            int i = curNode.i;
+            int j = curNode.j;
+            int distance = curNode.distance;
+
+            // out of bounds or already visited or not a pipe
             if (i < 0 || i >= map.length || j < 0 || j >= map[i].length || minDistance[i][j] <= distance
                     || map[i][j] == '.') {
                 continue;
             }
 
-            System.out.println(i + " " + j + "  |  " + curr[3] + " " + curr[4]);
-
-            if (map[i][j] == 'S') {
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == '|') {
-                if (curr[3] != 1 && curr[3] != -1) {
-                    continue;
+            // check if it was possible to reach this pipe from before by inverting the
+            // previous direction
+            // to see if it is a valid direction to go to from this pipe
+            boolean isPossibleToReach = false;
+            for (Node.Direction possibleDirection : pipes.get(map[i][j])) {
+                if (Node.invert(possibleDirection) == curNode.prevDir) {
+                    isPossibleToReach = true;
+                    break;
                 }
+            }
 
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-            } else if (map[i][j] == '-') {
-                if (curr[4] != 1 && curr[4] != -1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == 'L') {
-                if (curr[3] != 1 && curr[4] != -1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
-            } else if (map[i][j] == 'J') {
-                if (curr[3] != 1 && curr[4] != 1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == '7') {
-                if (curr[3] != -1 && curr[4] != 1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == 'F') {
-                if (curr[3] != -1 && curr[4] != -1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
+            // not possible to reach this pipe
+            if (!isPossibleToReach) {
+                continue;
             }
 
             minDistance[i][j] = distance;
-
+            for (Node.Direction possibleDirection : pipes.get(map[i][j])) {
+                switch (possibleDirection) {
+                    case UP:
+                        bfs.offer(new Node(i - 1, j, distance + 1, Node.Direction.UP));
+                        break;
+                    case DOWN:
+                        bfs.offer(new Node(i + 1, j, distance + 1, Node.Direction.DOWN));
+                        break;
+                    case LEFT:
+                        bfs.offer(new Node(i, j - 1, distance + 1, Node.Direction.LEFT));
+                        break;
+                    case RIGHT:
+                        bfs.offer(new Node(i, j + 1, distance + 1, Node.Direction.RIGHT));
+                        break;
+                }
+            }
         }
 
         int max = 0;
         for (int i = 0; i < minDistance.length; i++) {
             for (int j = 0; j < minDistance[i].length; j++) {
                 if (minDistance[i][j] != Integer.MAX_VALUE) {
-                    System.out.print(0 + "");
                     max = Math.max(max, minDistance[i][j]);
-                } else {
-                    System.out.print(".");
                 }
             }
-            System.out.println();
         }
 
         System.out.println(max);
@@ -139,74 +167,58 @@ public class Day10 {
             lines.add(console.nextLine());
         }
 
+        // expand map by 9 times to allow water to squeeze between pipes
         char[][] map = new char[lines.size() * 3][lines.get(0).length() * 3];
+
+        HashMap<Character, char[][]> expandedPipes = new HashMap<>();
+        expandedPipes.put('|', new char[][] {
+                { '.', '|', '.' },
+                { '.', '|', '.' },
+                { '.', '|', '.' }
+        });
+        expandedPipes.put('-', new char[][] {
+                { '.', '.', '.' },
+                { '-', '-', '-' },
+                { '.', '.', '.' }
+        });
+        expandedPipes.put('L', new char[][] {
+                { '.', '|', '.' },
+                { '.', 'L', '-' },
+                { '.', '.', '.' }
+        });
+        expandedPipes.put('J', new char[][] {
+                { '.', '|', '.' },
+                { '-', 'J', '.' },
+                { '.', '.', '.' }
+        });
+        expandedPipes.put('7', new char[][] {
+                { '.', '.', '.' },
+                { '-', '7', '.' },
+                { '.', '|', '.' }
+        });
+        expandedPipes.put('F', new char[][] {
+                { '.', '.', '.' },
+                { '.', 'F', '-' },
+                { '.', '|', '.' }
+        });
+        expandedPipes.put('.', new char[][] {
+                { '.', '.', '.' },
+                { '.', '.', '.' },
+                { '.', '.', '.' }
+        });
+        expandedPipes.put('S', new char[][] {
+                { '.', '|', '.' },
+                { '-', 'S', '-' },
+                { '.', '|', '.' }
+        });
         for (int i = 0; i < lines.size(); i++) {
             char[] line = lines.get(i).toCharArray();
             for (int j = 0; j < line.length; j++) {
-                char[][] m = new char[3][3];
+                char[][] expandedMap = expandedPipes.get(line[j]);
 
-                switch (line[j]) {
-                    case '|':
-                        m = new char[][] {
-                                { '.', '|', '.' },
-                                { '.', '|', '.' },
-                                { '.', '|', '.' }
-                        };
-                        break;
-                    case '-':
-                        m = new char[][] {
-                                { '.', '.', '.' },
-                                { '-', '-', '-' },
-                                { '.', '.', '.' }
-                        };
-                        break;
-                    case 'L':
-                        m = new char[][] {
-                                { '.', '|', '.' },
-                                { '.', 'L', '-' },
-                                { '.', '.', '.' }
-                        };
-                        break;
-                    case 'J':
-                        m = new char[][] {
-                                { '.', '|', '.' },
-                                { '-', 'J', '.' },
-                                { '.', '.', '.' }
-                        };
-                        break;
-                    case '7':
-                        m = new char[][] {
-                                { '.', '.', '.' },
-                                { '-', '7', '.' },
-                                { '.', '|', '.' }
-                        };
-                        break;
-                    case 'F':
-                        m = new char[][] {
-                                { '.', '.', '.' },
-                                { '.', 'F', '-' },
-                                { '.', '|', '.' }
-                        };
-                        break;
-                    case '.':
-                        m = new char[][] {
-                                { '.', '.', '.' },
-                                { '.', '.', '.' },
-                                { '.', '.', '.' }
-                        };
-                        break;
-                    case 'S':
-                        m = new char[][] {
-                                { '.', '|', '.' },
-                                { '-', 'S', '-' },
-                                { '.', '|', '.' }
-                        };
-                        break;
-                }
-
-                for (int k = 0; k < m.length; k++) {
-                    for (int l = 0; l < m[k].length; l++) {
-                        map[i * 3 + k][j * 3 + l] = m[k][l];
+                for (int k = 0; k < expandedMap.length; k++) {
+                    for (int l = 0; l < expandedMap[k].length; l++) {
+                        map[i * 3 + k][j * 3 + l] = expandedMap[k][l];
                     }
                 }
             }
@@ -219,13 +231,14 @@ public class Day10 {
                 if (map[i][j] == 'S') {
                     startI = i;
                     startJ = j;
+                    break;
                 }
             }
         }
 
         boolean[][] loop = new boolean[map.length][map[0].length];
-        Queue<int[]> bfs = new LinkedList<>();
-        bfs.offer(new int[] { startI, startJ, 0, 0, 0 });
+        Queue<Node> bfs = new LinkedList<>();
+        bfs.offer(new Node(startI, startJ, 0, Node.Direction.DOWN));
         int[][] minDistance = new int[map.length][map[0].length];
         for (int i = 0; i < minDistance.length; i++) {
             for (int j = 0; j < minDistance[i].length; j++) {
@@ -233,82 +246,65 @@ public class Day10 {
             }
         }
 
+        HashMap<Character, Node.Direction[]> pipes = new HashMap<>();
+        pipes.put('S', new Node.Direction[] { Node.Direction.UP, Node.Direction.DOWN, Node.Direction.LEFT,
+                Node.Direction.RIGHT });
+        pipes.put('|', new Node.Direction[] { Node.Direction.UP, Node.Direction.DOWN });
+        pipes.put('-', new Node.Direction[] { Node.Direction.LEFT, Node.Direction.RIGHT });
+        pipes.put('L', new Node.Direction[] { Node.Direction.UP, Node.Direction.RIGHT });
+        pipes.put('J', new Node.Direction[] { Node.Direction.UP, Node.Direction.LEFT });
+        pipes.put('7', new Node.Direction[] { Node.Direction.DOWN, Node.Direction.LEFT });
+        pipes.put('F', new Node.Direction[] { Node.Direction.DOWN, Node.Direction.RIGHT });
+
         while (!bfs.isEmpty()) {
-            int[] curr = bfs.poll();
-            int i = curr[0];
-            int j = curr[1];
-            int distance = curr[2];
+            Node curNode = bfs.poll();
+            int i = curNode.i;
+            int j = curNode.j;
+            int distance = curNode.distance;
+
+            // out of bounds or already visited or not a pipe
             if (i < 0 || i >= map.length || j < 0 || j >= map[i].length || minDistance[i][j] <= distance
                     || map[i][j] == '.') {
                 continue;
             }
 
-            System.out.println(i + " " + j + "  |  " + curr[3] + " " + curr[4]);
-
-            if (map[i][j] == 'S') {
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == '|') {
-                if (curr[3] != 1 && curr[3] != -1) {
-                    continue;
+            // check if it was possible to reach this pipe from before by inverting the
+            // previous direction
+            // to see if it is a valid direction to go to from this pipe
+            boolean isPossibleToReach = false;
+            for (Node.Direction possibleDirection : pipes.get(map[i][j])) {
+                if (Node.invert(possibleDirection) == curNode.prevDir) {
+                    isPossibleToReach = true;
+                    break;
                 }
+            }
 
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-            } else if (map[i][j] == '-') {
-                if (curr[4] != 1 && curr[4] != -1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == 'L') {
-                if (curr[3] != 1 && curr[4] != -1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
-            } else if (map[i][j] == 'J') {
-                if (curr[3] != 1 && curr[4] != 1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i - 1, j, distance + 1, -1, 0 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == '7') {
-                if (curr[3] != -1 && curr[4] != 1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i, j - 1, distance + 1, 0, -1 });
-            } else if (map[i][j] == 'F') {
-                if (curr[3] != -1 && curr[4] != -1) {
-                    continue;
-                }
-
-                bfs.add(new int[] { i + 1, j, distance + 1, 1, 0 });
-                bfs.add(new int[] { i, j + 1, distance + 1, 0, 1 });
+            // not possible to reach this pipe
+            if (!isPossibleToReach) {
+                continue;
             }
 
             minDistance[i][j] = distance;
             loop[i][j] = true;
-        }
-
-        for (int i = 0; i < loop.length; i++) {
-            for (int j = 0; j < loop[i].length; j++) {
-                if (loop[i][j]) {
-                    System.out.print(0 + "");
-                } else {
-                    System.out.print(".");
+            for (Node.Direction possibleDirection : pipes.get(map[i][j])) {
+                switch (possibleDirection) {
+                    case UP:
+                        bfs.offer(new Node(i - 1, j, distance + 1, Node.Direction.UP));
+                        break;
+                    case DOWN:
+                        bfs.offer(new Node(i + 1, j, distance + 1, Node.Direction.DOWN));
+                        break;
+                    case LEFT:
+                        bfs.offer(new Node(i, j - 1, distance + 1, Node.Direction.LEFT));
+                        break;
+                    case RIGHT:
+                        bfs.offer(new Node(i, j + 1, distance + 1, Node.Direction.RIGHT));
+                        break;
                 }
             }
-            System.out.println();
         }
 
+        // floodfill the edges if not part of the loop
         Queue<int[]> floodfill = new LinkedList<>();
         for (int i = 0; i < map.length; i++) {
             if (!loop[i][0]) {
@@ -328,16 +324,16 @@ public class Day10 {
             }
         }
 
-        boolean[][] outside = new boolean[map.length][map[0].length];
-        int[][] countVisited = new int[map.length / 3][map[0].length / 3];
+        boolean[][] visited = new boolean[map.length][map[0].length];
+        int[][] countVisited = new int[map.length / 3][map[0].length / 3]; // if this is 9, then it is outside the loop
         while (!floodfill.isEmpty()) {
             int[] curr = floodfill.poll();
             int i = curr[0];
             int j = curr[1];
-            if (i < 0 || i >= map.length || j < 0 || j >= map[i].length || loop[i][j] || outside[i][j]) {
+            if (i < 0 || i >= map.length || j < 0 || j >= map[i].length || loop[i][j] || visited[i][j]) {
                 continue;
             }
-            outside[i][j] = true;
+            visited[i][j] = true;
             countVisited[i / 3][j / 3]++;
 
             floodfill.offer(new int[] { i + 1, j });
@@ -358,6 +354,7 @@ public class Day10 {
             }
         }
 
+        // inside is just total subtracted by the outside and loop count
         int inside = countVisited.length * countVisited[0].length - countOutside - countLoop;
         System.out.println(inside);
     }
