@@ -37,126 +37,139 @@ public class Day07 {
         ArrayList<Hand> hands = new ArrayList<Hand>();
         while (console.hasNextLine()) {
             char[] hand = console.next().toCharArray();
-            int type = -1;
+            int handType = -1;
             HashMap<Character, Integer> counts = new HashMap<>();
             for (char c : hand) {
                 counts.put(c, counts.getOrDefault(c, 0) + 1);
             }
-            int max = 0;
+            int maxCardCount = 0;
             for (char c : counts.keySet()) {
-                max = Math.max(max, counts.get(c));
+                maxCardCount = Math.max(maxCardCount, counts.get(c));
             }
 
-            if (max == 5) { // five of a kind
-                type = 7;
-            } else if (max == 4) { // four of a kind
-                type = 6;
-            } else if (max == 3 && counts.size() == 2) { // full house
-                type = 5;
-            } else if (max == 3 && counts.size() == 3) { // three of a kind
-                type = 3;
-            } else if (max == 2 && counts.size() == 3) { // two pair
-                type = 2;
-            } else if (max == 2 && counts.size() == 4) { // one pair
-                type = 1;
+            if (maxCardCount == 5) { // five of a kind
+                handType = 7;
+            } else if (maxCardCount == 4) { // four of a kind
+                handType = 6;
+            } else if (maxCardCount == 3 && counts.size() == 2) { // full house
+                handType = 5;
+            } else if (maxCardCount == 3 && counts.size() == 3) { // three of a kind
+                handType = 3;
+            } else if (maxCardCount == 2 && counts.size() == 3) { // two pair
+                handType = 2;
+            } else if (maxCardCount == 2 && counts.size() == 4) { // one pair
+                handType = 1;
             } else { // high card
-                type = 0;
+                handType = 0;
             }
             int bid = console.nextInt();
 
-            hands.add(new Hand(bid, hand, type));
+            hands.add(new Hand(bid, hand, handType));
             console.nextLine();
         }
 
-        String val = "AKQJT98765432";
+        String val = "AKQJT98765432"; // order of cards
 
         Collections.sort(hands, new Comparator<Hand>() {
             @Override
-            public int compare(Hand o1, Hand o2) {
-                if (o1.type != o2.type) {
-                    return o2.type - o1.type;
+            public int compare(Hand h1, Hand h2) {
+                if (h1.type != h2.type) {
+                    return h2.type - h1.type; // sort by highest hand type
                 } else {
-                    for (int i = 0; i < o1.cards.length; i++) {
-                        if (o1.cards[i] != o2.cards[i]) {
-                            return val.indexOf(o1.cards[i]) - val.indexOf(o2.cards[i]);
+                    for (int i = 0; i < h1.cards.length; i++) {
+                        if (h1.cards[i] != h2.cards[i]) {
+                            // sort by highest card type (closest to the left in the order of cards)
+                            return val.indexOf(h1.cards[i]) - val.indexOf(h2.cards[i]);
                         }
                     }
                 }
-                return 0;
+
+                return 0; // equal hands
             }
         });
 
-        int tot = 0;
+        // sum of bids
+        int sum = 0;
         for (int i = 0; i < hands.size(); i++) {
-            tot += (hands.size() - i) * hands.get(i).bid;
+            sum += (hands.size() - i) * hands.get(i).bid;
         }
-        System.out.println(tot);
+        System.out.println(sum);
     }
 
     private static void part2(Scanner console) {
         ArrayList<Hand> hands = new ArrayList<Hand>();
         while (console.hasNextLine()) {
             char[] hand = console.next().toCharArray();
-            int type = -1;
+            int handType = -1;
             HashMap<Character, Integer> counts = new HashMap<>();
             for (char c : hand) {
                 counts.put(c, counts.getOrDefault(c, 0) + 1);
             }
-            int max = 0;
+            int maxCardCount = 0;
             for (char c : counts.keySet()) {
                 if (c == 'J') {
                     continue;
                 }
-                max = Math.max(max, counts.get(c));
+                maxCardCount = Math.max(maxCardCount, counts.get(c));
             }
 
             int countJ = counts.getOrDefault('J', 0);
-            int size = counts.size() - (countJ == 0 ? 0 : 1);
-            // System.out.println("J: " + countJ + " | max: " + max);
-            if (max + countJ == 5) {
-                type = 7;
-            } else if (max + countJ == 4) {
-                type = 6;
-            } else if (max <= 3 && max + countJ >= 3 && size <= 2 && size + (max + countJ) - 3 >= 2) {
-                type = 5;
-            } else if (max <= 3 && max + countJ >= 3 && size <= 3 && size + (max + countJ) - 3 >= 3) {
-                type = 3;
-            } else if (max <= 2 && max + countJ >= 2 && size <= 3 && size + (max + countJ) - 2 >= 3) {
-                type = 2;
-            } else if (max <= 2 && max + countJ >= 2 && size <= 4 && size + (max + countJ) - 2 >= 4) {
-                type = 1;
-            } else {
-                type = 0;
+            int sizeExcludingJ = counts.size() - (countJ == 0 ? 0 : 1);
+
+            int maxCardCountWithJ = maxCardCount + countJ; // max card count if J becomes the card
+            int maxUniqueCardsWithJ = sizeExcludingJ + (maxCardCount + countJ);
+
+            if (maxCardCountWithJ == 5) { // five of a kind
+                handType = 7;
+            } else if (maxCardCountWithJ == 4) { // four of a kind
+                handType = 6;
+            } else if (maxCardCount <= 3 && maxCardCountWithJ >= 3 &&
+                    sizeExcludingJ <= 2 && maxUniqueCardsWithJ - 3 >= 2) { // full house
+                handType = 5;
+            } else if (maxCardCount <= 3 && maxCardCountWithJ >= 3 &&
+                    sizeExcludingJ <= 3 && maxUniqueCardsWithJ - 3 >= 3) { // three of a kind
+                handType = 3;
+            } else if (maxCardCount <= 2 && maxCardCountWithJ >= 2 &&
+                    sizeExcludingJ <= 3 && maxUniqueCardsWithJ - 2 >= 3) { // two pair
+                handType = 2;
+            } else if (maxCardCount <= 2 && maxCardCountWithJ >= 2 &&
+                    sizeExcludingJ <= 4 && maxUniqueCardsWithJ - 2 >= 4) { // one pair
+                handType = 1;
+            } else { // high card
+                handType = 0;
             }
             int bid = console.nextInt();
 
-            hands.add(new Hand(bid, hand, type));
+            hands.add(new Hand(bid, hand, handType));
             console.nextLine();
         }
 
-        String val = "AKQT98765432J";
+        String val = "AKQJT98765432"; // order of cards
 
         Collections.sort(hands, new Comparator<Hand>() {
             @Override
-            public int compare(Hand o1, Hand o2) {
-                if (o1.type != o2.type) {
-                    return o2.type - o1.type;
+            public int compare(Hand h1, Hand h2) {
+                if (h1.type != h2.type) {
+                    return h2.type - h1.type; // sort by highest hand type
                 } else {
-                    for (int i = 0; i < o1.cards.length; i++) {
-                        if (o1.cards[i] != o2.cards[i]) {
-                            return val.indexOf(o1.cards[i]) - val.indexOf(o2.cards[i]);
+                    for (int i = 0; i < h1.cards.length; i++) {
+                        if (h1.cards[i] != h2.cards[i]) {
+                            // sort by highest card type (closest to the left in the order of cards)
+                            return val.indexOf(h1.cards[i]) - val.indexOf(h2.cards[i]);
                         }
                     }
                 }
-                return 0;
+
+                return 0; // equal hands
             }
         });
 
-        int tot = 0;
+        // sum of bids
+        int sum = 0;
         for (int i = 0; i < hands.size(); i++) {
-            tot += (hands.size() - i) * hands.get(i).bid;
+            sum += (hands.size() - i) * hands.get(i).bid;
         }
-        System.out.println(tot);
+        System.out.println(sum);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
