@@ -1,3 +1,5 @@
+package Day11;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.BufferedReader;
@@ -9,8 +11,8 @@ import java.io.FileReader;
  * Simply toggle the constants to run the correct part and files
  */
 public class Day11 {
-    private static final String TEST_FILES_DIRECTORY = "files\\tests";
-    private static final String INPUT_FILES_DIRECTORY = "files\\inputs";
+    private static final String TEST_FILES_DIRECTORY = "tests";
+    private static final String INPUT_FILES_DIRECTORY = "inputs";
 
     private static final String DAY = "11";
     private static final boolean RUN_TEST_INPUT = false;
@@ -201,9 +203,9 @@ public class Day11 {
         long startTime = System.currentTimeMillis();
         String file = "";
         if (RUN_TEST_INPUT) {
-            file = TEST_FILES_DIRECTORY + "\\day" + DAY;
+            file = "Day" + DAY + "\\" + TEST_FILES_DIRECTORY + "\\day" + DAY;
         } else {
-            file = INPUT_FILES_DIRECTORY + "\\day" + DAY;
+            file = "Day" + DAY + "\\" + INPUT_FILES_DIRECTORY + "\\day" + DAY;
         }
 
         if (RUN_PART_1) {
