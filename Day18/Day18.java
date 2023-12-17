@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -12,15 +13,80 @@ public class Day18 {
     private static final String INPUT_FILES_DIRECTORY = "inputs";
 
     private static final String DAY = "18";
-    private static final boolean RUN_TEST_INPUT = true;
-    private static final boolean RUN_PART_1 = true;
+    private static final boolean RUN_TEST_INPUT = false;
+    private static final boolean RUN_PART_1 = false;
 
     private static void part1(Scanner console) {
+        int targetTime = 2503;
+        int maxDistance = 0;
 
+        while (console.hasNextLine()) {
+            String[] parts = console.nextLine().split(" ");
+
+            int speed = Integer.parseInt(parts[3]);
+            int time = Integer.parseInt(parts[6]);
+            int wait = Integer.parseInt(parts[parts.length - 2]);
+
+            int fullCycles = targetTime / (time + wait);
+            int remainingTime = targetTime - fullCycles * (time + wait);
+
+            int distance = fullCycles * time * speed + Math.min(remainingTime, time) * speed;
+            maxDistance = Math.max(maxDistance, distance);
+        }
+
+        System.out.println(maxDistance);
     }
 
     private static void part2(Scanner console) {
+        int targetTime = 2503;
 
+        ArrayList<int[]> reindeers = new ArrayList<>();
+        while (console.hasNextLine()) {
+            String[] parts = console.nextLine().split(" ");
+
+            int speed = Integer.parseInt(parts[3]);
+            int time = Integer.parseInt(parts[6]);
+            int wait = Integer.parseInt(parts[parts.length - 2]);
+
+            reindeers.add(new int[] { speed, time, wait });
+        }
+
+        int[] pts = new int[reindeers.size()];
+        for (int t = 1; t <= targetTime; t++) {
+            int maxDistance = 0;
+            for (int[] reindeer : reindeers) {
+                int speed = reindeer[0];
+                int time = reindeer[1];
+                int wait = reindeer[2];
+
+                int fullCycles = t / (time + wait);
+                int remainingTime = t - fullCycles * (time + wait);
+
+                int distance = fullCycles * time * speed + Math.min(remainingTime, time) * speed;
+                maxDistance = Math.max(maxDistance, distance);
+            }
+
+            for (int i = 0; i < reindeers.size(); i++) {
+                int[] reindeer = reindeers.get(i);
+                int speed = reindeer[0];
+                int time = reindeer[1];
+                int wait = reindeer[2];
+
+                int fullCycles = t / (time + wait);
+                int remainingTime = t - fullCycles * (time + wait);
+
+                int distance = fullCycles * time * speed + Math.min(remainingTime, time) * speed;
+                if (distance == maxDistance) {
+                    pts[i]++;
+                }
+            }
+        }
+
+        int maxPoints = 0;
+        for (int i = 0; i < pts.length; i++) {
+            maxPoints = Math.max(maxPoints, pts[i]);
+        }
+        System.out.println(maxPoints);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
