@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Scanner;
-import java.util.Stack;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
